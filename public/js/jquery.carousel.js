@@ -8,88 +8,88 @@
  */
 var NAVY = NAVY || {};
 NAVY.Carousel = function(targetObj,containerObj,WrapperObj,options){
-    this.WrapperObj = $(WrapperObj);//内容对象的容器
-    this.containerObj = this.WrapperObj.find(containerObj);//内容对象
-    this.targetObjs = this.containerObj.find(targetObj);//目标移动对象
-    this.targetObjLen = this.targetObjs.length;//移动对象的长度
-    if(this.targetObjLen<=1){
+    var _this = this;
+    _this.WrapperObj = $(WrapperObj);//内容对象的容器
+    _this.containerObj = _this.WrapperObj.find(containerObj);//内容对象
+    _this.targetObj = targetObj;
+    _this.targetObjs = _this.containerObj.find(targetObj);//目标移动对象
+    _this.targetObjLen = _this.targetObjs.length;//移动对象的长度
+    if(_this.targetObjLen<=1){
         return false;
     }
-    this.WrapperObjWidth = this.WrapperObj.outerWidth();//获取容器对象的宽度
-    this.WrapperObjHeight = this.WrapperObj.outerHeight();//获取容器对象的高度
+    _this.WrapperObjWidth = _this.WrapperObj.outerWidth();//获取容器对象的宽度
+    _this.WrapperObjHeight = _this.WrapperObj.outerHeight();//获取容器对象的高度
     var defaultOptions = {
         speed:3000,//运动的时间间隔
         direction:'vertical',//运动方向，水平或者垂直
-        isNumber:true,//是否显示右下角数字
+        isLoop:true,//是否循环轮播
+        moveCount:1,//默认移动的个数
+        targetObjHeight:_this.WrapperObjHeight,//targetObj的高度
+        targetObjWidth:_this.WrapperObjWidth,//targetObj的宽度
+        isOpacityOthers:false,
         isAnimate:true//移动效果是否使用animate
     };
+    _this.moveCount = 0;
     $.extend(defaultOptions,options);
-    this.options = defaultOptions;
-    this.init();//初始化
+    _this.options = defaultOptions;
+    if(_this.options.moveCount > _this.targetObjLen){
+        _this.options.moveCount = _this.targetObjLen;//如果传入的目标对象的个数大于目标对象的总数，则最大的移动个数为总数
+    }
+    _this.maskHtml='<div class="hoverMask eightyOpacity"></div>';//鼠标移上目标对象时的遮罩
+    _this.init();//初始化
 };
 NAVY.Carousel.prototype = {
     init:function(){
         var _this = this;
         var options = _this.options;
-        _this.WrapperObj.css({'overflow':'hidden'});//设置容器对象css的overflow值，防止用户没设置
+        _this.WrapperObj.css({'overflow':'hidden'}).append(_this.maskHtml);//设置容器对象css的overflow值，防止用户没设置
+        if(options.isOpacityOthers){
+            _this.targetObjs.addClass('carouselRelative')
+        }
         if(_this.WrapperObj.css('position') === 'static'){
             _this.WrapperObj.css({'position':'relative'});//若容器对象未设置position值，则设置为relative
         }
         switch(options.direction){
             case 'vertical':
-                _this.containerObj.css({height:(_this.WrapperObjHeight)*(_this.targetObjLen)});//水平方向设置内容对象的高度为乘以目标对象的个数
+                _this.containerObj.css({height:(options.targetObjHeight)*(_this.targetObjLen)});//水平方向设置内容对象的高度为乘以目标对象的个数
                 break;
             case 'horizontal':
-                _this.containerObj.css({width:(_this.WrapperObjWidth)*(_this.targetObjLen)});//垂直方向设置内容对象的宽度为容器对象的宽度乘以目标对象的个数
-                _this.targetObjs.css({float:'left','margin':0,width:_this.WrapperObjWidth});//设置目标对象的float值以及初始化margin，width值
+                _this.containerObj.css({width:(options.targetObjWidth)*(_this.targetObjLen)});//垂直方向设置内容对象的宽度为容器对象的宽度乘以目标对象的个数
+                _this.targetObjs.css({'float':'left','margin':0,width:options.targetObjWidth});//设置目标对象的float值以及初始化margin，width值
                 break;
             default :
                 _this.containerObj.css({height:(_this.WrapperObjHeight)*(_this.targetObjLen)});
-        }
-        if(options.isNumber){
-            _this.makeNumber();//显示右下角的数字
         }
         _this.initEvent();//初始化事件
     },
     initEvent:function(){
         var _this = this;
-        _this.startCarousel(1);//开始移动
-        var currentSelectIndex = 0;
-        var i = 0,targetObjs = _this.targetObjs;
+        var options = _this.options;
+        _this.startCarousel();//开始移动
+        var hoverHiddenObj = _this.WrapperObj.find('.hoverMask');
         //内容对象的hover事件
-        _this.containerObj.hover(function(){
-            for(i=0;i<this.targetObjLen;i++){
-                if($(targetObjs[i]).hasClass('selected')){
-                    currentSelectIndex = i;
-                    break;
-                }
+        _this.targetObjs.hover(function(){
+            if(options.isOpacityOthers){
+                //显示聚焦时的遮罩
+                hoverHiddenObj.show().appendTo(this).animate({opacity:0.5});
             }
             _this.stopCarousel();
         },function(){
-            _this.startCarousel(1+currentSelectIndex);
+            if(options.isOpacityOthers){
+                //隐藏聚焦时的遮罩
+                hoverHiddenObj.hide().css({opacity:0.3});
+            }
+            _this.startCarousel();
         });
-        //数字对象的hover时间
-        if(_this.options.isNumber){
-            _this.numberListObjs.hover(function(){
-                currentSelectIndex = parseInt($(this).attr('data-index'));
-                _this.setMargin(currentSelectIndex);
-                _this.stopCarousel();
-            },function(){
-                _this.startCarousel(1+currentSelectIndex);
-            });
-        }
     },
     /**
      * 开始移动
-     * @param index 当前显示的目标对象的下标
      */
-    startCarousel:function(index){
+    startCarousel:function(){
         var _this = this;
         var options = _this.options;
         _this.intervalId = setInterval(function(){
-            index = (index >= _this.targetObjLen ? 0 : index);
-            _this.setMargin(index);
-            index++;
+            _this.setMargin();
         },options.speed);
     },
     /**
@@ -104,55 +104,28 @@ NAVY.Carousel.prototype = {
      * 设置内容对象的margin值，水平方向为marginLeft,垂直方向为marginTop
      * @param index 当前要显示的目标对象下标
      */
-    setMargin:function(index){
-        var width = this.WrapperObjWidth;
-        var height = this.WrapperObjHeight;
+    setMargin:function(){
         var options = this.options;
-        var animateCss = {};
-        switch(options.direction){
-            case 'vertical':
-                animateCss = {marginTop:-height*index};
-                break;
-            case 'horizontal':
-                animateCss = {marginLeft:-width*index};
-                break;
-            default :
-                animateCss = {marginTop:-height*index};
+        var width = options.targetObjWidth;
+        var height = options.targetObjHeight;
+        if(!(options.isLoop) && (++(this.moveCount)*(options.moveCount) >= this.targetObjLen)){
+            this.stopCarousel();
+            return false;
+        }
+        var containerObj = this.containerObj;
+        var appendTargetObj = containerObj.find(this.targetObj).slice(0,options.moveCount);
+        var animateCss = 'margin-top',animateValue = -height*(options.moveCount),animateObj = {marginTop:animateValue};
+        if(options.direction === 'horizontal'){
+            animateCss = 'margin-left';
+            animateValue = -width*(options.moveCount);
+            animateObj = {marginLeft:animateValue};
         }
         if(options.isAnimate){
-            this.containerObj.stop(true,true).animate(animateCss);
+            containerObj.stop(true,true).animate(animateObj,500,function(){
+                containerObj.css(animateCss,0).append(appendTargetObj);
+            });
         }else{
-            this.containerObj.css(animateCss);
+            containerObj.css(animateCss,animateValue).css(animateCss,0).append(appendTargetObj);
         }
-        if(this.options.isNumber){
-            this.changeNumberStatue(index);
-        }
-    },
-    /**
-     * 改变数字的显示状态
-     * @param index 当前选中的数字下标
-     */
-    changeNumberStatue:function(index){
-        var numberListObjs = this.numberListObjs;
-        numberListObjs.removeClass('selected').eq(index).addClass('selected');
-    },
-    /**
-     * 生成右下角数字的函数
-     */
-    makeNumber:function(){
-        var targetObjLen = this.targetObjLen,targetObjs = this.targetObjs;
-        var i = 0,numberHtml = ['<ul class="numberWrapper">'];
-        for(;i<targetObjLen;i++){
-            var className = 'numberList';
-            if(i===0){
-                $(targetObjs[0]).addClass('selected');
-                className += ' selected';
-            }
-            numberHtml.push('<li data-index='+i+' class="'+className+'">'+(1+i)+'</li>');
-        }
-        numberHtml.push('</ul>');
-        this.WrapperObj.append(numberHtml.join(''));
-        this.numberWrapperObj = this.WrapperObj.find('.numberWrapper');
-        this.numberListObjs = this.numberWrapperObj.find('.numberList');
     }
 };

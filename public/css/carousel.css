@@ -1,5 +1,1 @@
-*{margin:0;padding:0;}
-ul,li{list-style:none;}
-.floatLeft{float:left;}
-.numberWrapper{position:absolute;right:0;bottom:5px;}.numberWrapper .numberList{display:inline;padding:2px 7px;margin-right:5px;border-radius:10px;background:#fff;color:#000;opacity:0.8;filter:alpha（opacity=80);cursor:pointer;}
-.numberWrapper .selected{color:red;}
+*{margin:0;padding:0;}ul,li{list-style:none;}.floatLeft{float:left;}.numberWrapper{position:absolute;right:0;bottom:5px;}.numberWrapper .numberList{display:inline;padding:2px 7px;margin-right:5px;border-radius:10px;background:#fff;color:#000;opacity:0.8;filter:alpha(opacity=80);cursor:pointer;}.numberWrapper .selected{color:red;}.eightyOpacity{opacity:0.3;filter:alpha(opacity=30);background:#fff;}.hoverMask{position:absolute;z-index:999;width:100%;height:100%;left:0;top:0;display:none;}.carouselRelative{position:relative;}

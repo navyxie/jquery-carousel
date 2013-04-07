@@ -16,7 +16,7 @@
         }
         #wrapper{
             width: 300px;
-            height: 250px;
+            height: 500px;
             background: blue;
             margin: 20px auto;
             overflow: hidden;
@@ -41,7 +41,17 @@
         </ul>
     </div>
 <script type="text/javascript">
-    new NAVY.Carousel('.list','#content','#wrapper',{direction:'horizontal'});
+//    var defaultOptions = {
+//        speed:3000,//运动的时间间隔
+//        direction:'vertical',//运动方向，水平或者垂直
+//        isLoop:true,//是否循环轮播
+//        moveCount:1,//默认移动的个数
+//        targetObjHeight:'',//targetObj的高度即每个移动元素的高度
+//        targetObjWidth:'',//targetObj的宽度即每个移动元素的宽度
+//        isOpacityOthers:false,//鼠标聚焦目标对象时是否灰掉其他选项
+//        isAnimate:true//移动效果是否使用animate
+//    };
+    new NAVY.Carousel('.list','#content','#wrapper',{direction:'vertical',moveCount:2,targetObjHeight:250,isOpacityOthers:true});
 </script>
 </body>
 </html>
