@@ -61,6 +61,7 @@ NAVY.Carousel.prototype = {
                 _this.containerObj.css({height:(_this.WrapperObjHeight)*(_this.targetObjLen)});
         }
         _this.initEvent();//初始化事件
+        return this;
     },
     initEvent:function(){
         var _this = this;
@@ -81,6 +82,7 @@ NAVY.Carousel.prototype = {
             }
             _this.startCarousel();
         });
+        return this;
     },
     /**
      * 开始移动
@@ -91,6 +93,7 @@ NAVY.Carousel.prototype = {
         _this.intervalId = setInterval(function(){
             _this.setMargin();
         },options.speed);
+        return this;
     },
     /**
      * 停止移动
@@ -99,6 +102,7 @@ NAVY.Carousel.prototype = {
         if(this.intervalId){
             clearInterval(this.intervalId);
         }
+        return this;
     },
     /**
      * 设置内容对象的margin值，水平方向为marginLeft,垂直方向为marginTop
@@ -127,5 +131,6 @@ NAVY.Carousel.prototype = {
         }else{
             containerObj.css(animateCss,animateValue).css(animateCss,0).append(appendTargetObj);
         }
+        return this;
     }
 };
